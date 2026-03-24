@@ -3,7 +3,7 @@
 # Fires 7 requests — first 5 ALLOWED, last 2 BLOCKED
 
 API_KEY="demo-user-$(date +%s)"
-GATEWAY="http://localhost:8080/api/resource/data"
+GATEWAY="http://localhost:8090/api/resource/data"
 
 echo ""
 echo "🛡️  GateKeeper — Rate Limiter Demo"
@@ -34,7 +34,7 @@ done
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "📊  Check Analytics Dashboard:"
-echo "    curl http://localhost:8082/analytics/blocked"
+echo "    curl http://localhost:8092/analytics/blocked"
 echo ""
 echo "🔭  Check Eureka Service Registry:"
 echo "    http://localhost:8761"
