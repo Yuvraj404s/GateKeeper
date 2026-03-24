@@ -1,0 +1,115 @@
+version: '3.8'
+
+networks:
+  gatekeeper-network:
+    driver: bridge
+
+services:
+
+  redis:
+    image: redis:7-alpine
+    container_name: gatekeeper-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - gatekeeper-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: gatekeeper-postgres
+    environment:
+      POSTGRES_DB: gatekeeperdb
+      POSTGRES_USER: gatekeeper
+      POSTGRES_PASSWORD: gatekeeper123
+    ports:
+      - "5432:5432"
+    networks:
+      - gatekeeper-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gatekeeper -d gatekeeperdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  eureka-server:
+    build: ./eureka-server
+    container_name: gatekeeper-eureka
+    ports:
+      - "8761:8761"
+    networks:
+      - gatekeeper-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  rate-limiter-service:
+    build: ./rate-limiter-service
+    container_name: gatekeeper-ratelimiter
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      ANALYTICS_SERVICE_URL: http://analytics-service:8082
+    depends_on:
+      redis:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - gatekeeper-network
+
+  analytics-service:
+    build: ./analytics-service
+    container_name: gatekeeper-analytics
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/gatekeeperdb
+      SPRING_DATASOURCE_USERNAME: gatekeeper
+      SPRING_DATASOURCE_PASSWORD: gatekeeper123
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - gatekeeper-network
+
+  resource-service:
+    build: ./resource-service
+    container_name: gatekeeper-resource
+    ports:
+      - "8083:8083"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - gatekeeper-network
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: gatekeeper-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      RATE_LIMITER_URL: http://rate-limiter-service:8081
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      rate-limiter-service:
+        condition: service_started
+    networks:
+      - gatekeeper-network
