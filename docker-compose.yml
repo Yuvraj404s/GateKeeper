@@ -10,7 +10,7 @@ services:
     image: redis:7-alpine
     container_name: gatekeeper-redis
     ports:
-      - "6379:6379"
+      - "6380:6379"
     networks:
       - gatekeeper-network
     healthcheck:
@@ -53,7 +53,7 @@ services:
     build: ./rate-limiter-service
     container_name: gatekeeper-ratelimiter
     ports:
-      - "8081:8081"
+      - "8091:8081"
     environment:
       SPRING_REDIS_HOST: redis
       SPRING_REDIS_PORT: 6379
@@ -71,7 +71,7 @@ services:
     build: ./analytics-service
     container_name: gatekeeper-analytics
     ports:
-      - "8082:8082"
+      - "8092:8082"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/gatekeeperdb
       SPRING_DATASOURCE_USERNAME: gatekeeper
@@ -89,7 +89,7 @@ services:
     build: ./resource-service
     container_name: gatekeeper-resource
     ports:
-      - "8083:8083"
+      - "8093:8083"
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
     depends_on:
@@ -102,7 +102,7 @@ services:
     build: ./api-gateway
     container_name: gatekeeper-gateway
     ports:
-      - "8080:8080"
+      - "8090:8080"
     environment:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
       RATE_LIMITER_URL: http://rate-limiter-service:8081
