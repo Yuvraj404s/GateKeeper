@@ -113,3 +113,15 @@ services:
         condition: service_started
     networks:
       - gatekeeper-network
+
+  frontend:
+    build: ./frontend
+    container_name: gatekeeper-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api-gateway
+      - analytics-service
+      - rate-limiter-service
+    networks:
+      - gatekeeper-network
