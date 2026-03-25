@@ -9,23 +9,24 @@ import './index.css'
 const theme = createTheme({
   palette: {
     mode: 'dark',
-    primary: { main: '#38bdf8' },
-    success: { main: '#34d399' },
-    error:   { main: '#f87171' },
-    background: { default: '#0f1923', paper: 'rgba(255,255,255,0.04)' },
-    text: { primary: '#f1f5f9', secondary: '#94a3b8' },
+    primary:    { main: '#f97316' },
+    success:    { main: '#22c55e' },
+    error:      { main: '#ef4444' },
+    warning:    { main: '#eab308' },
+    background: { default: '#18181b', paper: '#27272a' },
+    text:       { primary: '#e4e4e7', secondary: '#71717a' },
+    divider:    'rgba(63,63,70,0.8)',
   },
   typography: { fontFamily: 'Inter, sans-serif' },
-  shape: { borderRadius: 12 },
+  shape: { borderRadius: 10 },
   components: {
     MuiCard: {
       styleOverrides: {
         root: {
           backgroundImage: 'none',
-          background: 'rgba(255,255,255,0.04)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
+          background: '#27272a',
+          border: '1px solid #3f3f46',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
         }
       }
     },
@@ -33,25 +34,13 @@ const theme = createTheme({
       styleOverrides: {
         root: { textTransform: 'none', fontWeight: 600, borderRadius: 8 },
         containedPrimary: {
-          background: '#38bdf8',
-          color: '#0c1a27',
+          background: '#f97316', color: '#fff',
           boxShadow: 'none',
-          '&:hover': { background: '#7dd3fc', boxShadow: 'none' },
-          '&:disabled': { background: 'rgba(255,255,255,0.08)', color: '#475569' },
+          '&:hover': { background: '#ea6d08', boxShadow: 'none' },
+          '&:disabled': { background: '#3f3f46', color: '#52525b' },
         }
       }
     },
-    MuiTextField: {
-      styleOverrides: {
-        root: {
-          '& .MuiOutlinedInput-root': {
-            '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
-            '&:hover fieldset': { borderColor: 'rgba(56,189,248,0.4)' },
-            '&.Mui-focused fieldset': { borderColor: '#38bdf8' },
-          }
-        }
-      }
-    }
   }
 })
 
