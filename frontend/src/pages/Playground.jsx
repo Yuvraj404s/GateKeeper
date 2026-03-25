@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState } from 'react'
 import {
   Box, Container, Grid, Card, CardContent, Typography, TextField,
   Button, Chip, Divider, LinearProgress, Tooltip, IconButton
@@ -16,14 +16,10 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
 const GATEWAY = '/api-gk/api/resource/data'
 
-function RequestLog({ entry, index }) {
+function RequestLog({ entry }) {
   const isAllowed = entry.status === 200
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.05 }}
-    >
+    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }}>
       <Box sx={{
         mb: 1.5, p: 2, borderRadius: 2,
         bgcolor: isAllowed ? 'rgba(16,185,129,0.05)' : 'rgba(239,68,68,0.05)',
@@ -48,7 +44,6 @@ function RequestLog({ entry, index }) {
               sx={{ bgcolor: '#1f2937', color: '#6b7280', fontSize: '0.7rem' }} />
           </Box>
         </Box>
-
         <Grid container spacing={1.5}>
           <Grid item xs={12} md={6}>
             <Typography variant="caption" sx={{ color: '#6b7280', display: 'block', mb: 0.5, fontWeight: 600 }}>
@@ -74,102 +69,63 @@ function RequestLog({ entry, index }) {
   )
 }
 
-export default function Playground() {
+export default function Playground({ logs, setLogs, requestNum }) {
   const [apiKey, setApiKey] = useState('recruiter-demo')
-  const [logs, setLogs] = useState([])
   const [loading, setLoading] = useState(false)
   const [demoRunning, setDemoRunning] = useState(false)
   const [copied, setCopied] = useState(false)
-  const requestNum = useRef(0)
 
   const sendRequest = async (key) => {
     const num = ++requestNum.current
     const startTime = Date.now()
     const usedKey = key || apiKey || 'anonymous'
-    const requestSnippet = `curl -X GET http://localhost:8090/api/resource/data \
-  -H "X-API-KEY: ${usedKey}"`
-
+    const requestSnippet = `curl -X GET http://localhost:8090/api/resource/data \\\n  -H "X-API-KEY: ${usedKey}"`
     try {
       const res = await axios.get(GATEWAY, { headers: { 'X-API-KEY': usedKey } })
       const latency = Date.now() - startTime
-      setLogs(prev => [{
-        requestNum: num, status: 200, latency,
-        timestamp: Date.now(), requestSnippet,
-        responseSnippet: JSON.stringify(res.data, null, 2)
-      }, ...prev])
+      setLogs(prev => [{ requestNum: num, status: 200, latency, timestamp: Date.now(), requestSnippet, responseSnippet: JSON.stringify(res.data, null, 2) }, ...prev])
     } catch (err) {
       const latency = Date.now() - startTime
       const status = err.response?.status || 0
       const body = err.response?.data || { error: 'Request failed' }
-      setLogs(prev => [{
-        requestNum: num, status, latency,
-        timestamp: Date.now(), requestSnippet,
-        responseSnippet: JSON.stringify(body, null, 2)
-      }, ...prev])
+      setLogs(prev => [{ requestNum: num, status, latency, timestamp: Date.now(), requestSnippet, responseSnippet: JSON.stringify(body, null, 2) }, ...prev])
     }
   }
 
-  const handleSingle = async () => {
-    setLoading(true)
-    await sendRequest()
-    setLoading(false)
-  }
+  const handleSingle = async () => { setLoading(true); await sendRequest(); setLoading(false) }
 
   const handleDemo = async () => {
     setDemoRunning(true)
-    setLogs([])
-    requestNum.current = 0
     const demoKey = `demo-${Date.now()}`
-    for (let i = 0; i < 7; i++) {
-      await sendRequest(demoKey)
-      await new Promise(r => setTimeout(r, 400))
-    }
+    for (let i = 0; i < 7; i++) { await sendRequest(demoKey); await new Promise(r => setTimeout(r, 400)) }
     setDemoRunning(false)
   }
 
-  const curlExample = `curl -X GET http://localhost:8090/api/resource/data \
-  -H "X-API-KEY: ${apiKey || 'your-api-key'}"`
+  const curlExample = `curl -X GET http://localhost:8090/api/resource/data \\\n  -H "X-API-KEY: ${apiKey || 'your-api-key'}"`
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(curlExample)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+  const copyToClipboard = () => { navigator.clipboard.writeText(curlExample); setCopied(true); setTimeout(() => setCopied(false), 2000) }
 
   const allowedCount = logs.filter(l => l.status === 200).length
   const blockedCount = logs.filter(l => l.status !== 200).length
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
-      {/* Header */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>
-          🎮 Rate Limiter Playground
-        </Typography>
+        <Typography variant="h4" sx={{ fontWeight: 800, mb: 1 }}>🎮 Rate Limiter Playground</Typography>
         <Typography variant="body1" sx={{ color: '#9ca3af' }}>
-          Send real HTTP requests through the GateKeeper API Gateway and watch the Sliding Window algorithm in action.
-          Every request shows the exact payload sent and response received.
+          Send real HTTP requests through the GateKeeper API Gateway. Every request shows the exact payload sent and raw response received.
         </Typography>
       </Box>
 
       <Grid container spacing={3}>
-        {/* Control Panel */}
         <Grid item xs={12} md={4}>
           <Card sx={{ bgcolor: '#111827', mb: 2 }}>
             <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-                ⚙️ Request Config
-              </Typography>
-
-              <TextField
-                fullWidth label="X-API-KEY Header" value={apiKey}
-                onChange={e => setApiKey(e.target.value)}
-                variant="outlined" size="small"
-                helperText="Requests are tracked per API key. Same key = shared rate limit."
-                sx={{ mb: 2,
-                  '& .MuiOutlinedInput-root': { fontFamily: 'JetBrains Mono, monospace', fontSize: '0.85rem' }
-                }}
-              />
+              <Typography variant="h6" sx={{ mb: 2 }}>⚙️ Request Config</Typography>
+              <TextField fullWidth label="X-API-KEY Header" value={apiKey}
+                onChange={e => setApiKey(e.target.value)} variant="outlined" size="small"
+                helperText="Requests tracked per API key. Same key = shared rate limit."
+                sx={{ mb: 2, '& .MuiOutlinedInput-root': { fontFamily: 'JetBrains Mono, monospace', fontSize: '0.85rem' } }} />
 
               <Box sx={{ mb: 2, p: 2, bgcolor: '#0d1117', borderRadius: 2, border: '1px solid #1f2937' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
@@ -185,24 +141,20 @@ export default function Playground() {
                 </Typography>
               </Box>
 
-              <Button fullWidth variant="contained" startIcon={<SendIcon />}
-                onClick={handleSingle} disabled={loading || demoRunning}
+              <Button fullWidth variant="contained" startIcon={<SendIcon />} onClick={handleSingle}
+                disabled={loading || demoRunning}
                 sx={{ mb: 1.5, py: 1.2, bgcolor: '#6366f1', '&:hover': { bgcolor: '#4f46e5' } }}>
                 {loading ? 'Sending...' : 'Fire Single Request'}
               </Button>
-
-              <Button fullWidth variant="outlined" startIcon={<PlayArrowIcon />}
-                onClick={handleDemo} disabled={loading || demoRunning}
-                sx={{ py: 1.2, borderColor: '#6366f1', color: '#6366f1',
-                  '&:hover': { borderColor: '#4f46e5', bgcolor: 'rgba(99,102,241,0.08)' } }}>
+              <Button fullWidth variant="outlined" startIcon={<PlayArrowIcon />} onClick={handleDemo}
+                disabled={loading || demoRunning}
+                sx={{ py: 1.2, borderColor: '#6366f1', color: '#6366f1', '&:hover': { borderColor: '#4f46e5', bgcolor: 'rgba(99,102,241,0.08)' } }}>
                 {demoRunning ? 'Running Demo...' : 'Run Full Demo (7 Requests)'}
               </Button>
-
               {demoRunning && <LinearProgress sx={{ mt: 1.5, borderRadius: 1, bgcolor: '#1f2937', '& .MuiLinearProgress-bar': { bgcolor: '#6366f1' } }} />}
             </CardContent>
           </Card>
 
-          {/* Rate Limit Rules */}
           <Card sx={{ bgcolor: '#111827', mb: 2 }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" sx={{ mb: 2 }}>📋 Rate Limit Rules</Typography>
@@ -222,7 +174,6 @@ export default function Playground() {
             </CardContent>
           </Card>
 
-          {/* Live Stats */}
           {logs.length > 0 && (
             <Card sx={{ bgcolor: '#111827' }}>
               <CardContent sx={{ p: 3 }}>
@@ -252,7 +203,6 @@ export default function Playground() {
           )}
         </Grid>
 
-        {/* Request/Response Log */}
         <Grid item xs={12} md={8}>
           <Card sx={{ bgcolor: '#111827', height: '100%', minHeight: 500 }}>
             <CardContent sx={{ p: 3 }}>
@@ -264,9 +214,8 @@ export default function Playground() {
                 </Box>
               </Box>
               <Divider sx={{ borderColor: '#1f2937', mb: 2 }} />
-
               {logs.length === 0 ? (
-                <Box sx={{ textAlign: 'center', py: 8, color: '#4b5563' }}>
+                <Box sx={{ textAlign: 'center', py: 8 }}>
                   <Typography variant="h2" sx={{ mb: 2 }}>🛡️</Typography>
                   <Typography variant="h6" sx={{ color: '#6b7280' }}>No requests yet</Typography>
                   <Typography variant="body2" sx={{ color: '#4b5563', mt: 1 }}>
@@ -276,7 +225,7 @@ export default function Playground() {
               ) : (
                 <Box sx={{ maxHeight: 700, overflowY: 'auto', pr: 1 }}>
                   <AnimatePresence>
-                    {logs.map((entry, i) => <RequestLog key={entry.requestNum} entry={entry} index={i} />)}
+                    {logs.map((entry) => <RequestLog key={entry.requestNum} entry={entry} />)}
                   </AnimatePresence>
                 </Box>
               )}
