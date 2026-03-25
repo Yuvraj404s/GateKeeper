@@ -10,7 +10,7 @@ import axios from 'axios'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
-const GATEWAY = '/api-gk/api/resource/data'
+const GATEWAY = 'https://gatekeeper-api-gateway.onrender.com/api/resource/data'
 const codeStyle = { margin:0, borderRadius:0, fontSize:'0.74rem', background:'#09090b', padding:'14px 16px', minHeight:100 }
 
 function RequestCard({ entry }) {
@@ -80,7 +80,7 @@ export default function Playground({ logs, setLogs, requestNum }) {
 
   const sendRequest = async (key) => {
     const num = ++requestNum.current; const t0 = Date.now(); const k = key||apiKey||'anon'
-    const snippet = `curl -X GET http://localhost:8090/api/resource/data \\\n  -H "X-API-KEY: ${k}"`
+    const snippet = `curl -X GET https://gatekeeper-api-gateway.onrender.com/api/resource/data \\\n  -H "X-API-KEY: ${k}"`
     try {
       const res = await axios.get(GATEWAY, {headers:{'X-API-KEY':k}})
       setLogs(p=>[{requestNum:num,status:200,latency:Date.now()-t0,timestamp:Date.now(),requestSnippet:snippet,responseSnippet:JSON.stringify(res.data,null,2)},...p])
@@ -121,7 +121,7 @@ export default function Playground({ logs, setLogs, requestNum }) {
                 <Box sx={{ px:2, py:1, bgcolor:'#18181b', borderBottom:'1px solid #27272a', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
                   <Typography sx={{ fontSize:'0.63rem', fontWeight:700, color:'#52525b', letterSpacing:'0.08em' }}>CURL EQUIVALENT</Typography>
                   <Tooltip title={copied?'Copied!':'Copy'}>
-                    <IconButton size="small" onClick={()=>{navigator.clipboard.writeText(`curl -X GET http://localhost:8090/api/resource/data -H "X-API-KEY: ${apiKey}"`);setCopied(true);setTimeout(()=>setCopied(false),2000)}}
+                    <IconButton size="small" onClick={()=>{navigator.clipboard.writeText(`curl -X GET https://gatekeeper-api-gateway.onrender.com/api/resource/data -H "X-API-KEY: ${apiKey}"`);setCopied(true);setTimeout(()=>setCopied(false),2000)}}
                       sx={{ color:copied?'#22c55e':'#52525b', p:0.3 }}>
                       <ContentCopyIcon sx={{ fontSize:13 }}/>
                     </IconButton>
@@ -130,7 +130,7 @@ export default function Playground({ logs, setLogs, requestNum }) {
                 <Typography sx={{ fontFamily:'JetBrains Mono, monospace', fontSize:'0.71rem', color:'#a1a1aa',
                   px:2, py:1.5, lineHeight:1.9, whiteSpace:'pre' }}>
                   {`curl -X GET \
-  localhost:8090/api/resource/data \
+  gatekeeper-api-gateway.onrender.com/api/resource/data \
   -H "X-API-KEY: ${apiKey}"`}
                 </Typography>
               </Box>
