@@ -7,14 +7,12 @@ import HowItWorks from './pages/HowItWorks'
 import { Box } from '@mui/material'
 
 export default function App() {
-  // Lifted state — persists across page navigation
   const [logs, setLogs] = useState([])
   const requestNum = useRef(0)
-
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#0a0e1a' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: '#f3f4f6' }}>
       <Navbar />
-      <Box sx={{ pt: '72px' }}>
+      <Box sx={{ pt: '56px' }}>
         <Routes>
           <Route path="/" element={<Playground logs={logs} setLogs={setLogs} requestNum={requestNum} />} />
           <Route path="/analytics" element={<Analytics />} />
