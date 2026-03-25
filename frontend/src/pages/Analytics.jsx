@@ -28,7 +28,7 @@ export default function Analytics() {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [ts, setTs] = useState(null)
-  const load = async()=>{ try{ const r=await axios.get('/analytics-gk/analytics/blocked'); setData(r.data); setTs(new Date()) }catch(e){console.error(e)}finally{setLoading(false)} }
+  const load = async()=>{ try{ const r=await axios.get('https://gatekeeper-analytics.onrender.com/analytics/blocked'); setData(r.data); setTs(new Date()) }catch(e){console.error(e)}finally{setLoading(false)} }
   useEffect(()=>{ load(); const t=setInterval(load,5000); return()=>clearInterval(t) },[])
 
   if(loading) return <Box sx={{display:'flex',alignItems:'center',justifyContent:'center',height:'60vh',flexDirection:'column',gap:2}}>
