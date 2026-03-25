@@ -1,0 +1,20 @@
+{
+  "rewrites": [
+    {
+      "source": "/api-gk/(.*)",
+      "destination": "https://gatekeeper-api-gateway.onrender.com/$1"
+    },
+    {
+      "source": "/analytics-gk/(.*)",
+      "destination": "https://gatekeeper-analytics.onrender.com/$1"
+    },
+    {
+      "source": "/ratelimit-gk/(.*)",
+      "destination": "https://gatekeeper-rate-limiter.onrender.com/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
