@@ -1,88 +1,82 @@
 import React, { useState } from 'react'
 import {
-  Box, Container, Grid, Card, CardContent, Typography, TextField,
-  Button, Chip, Divider, LinearProgress, Tooltip, IconButton, Avatar
+  Box, Grid, Typography, TextField, Button, Chip,
+  Divider, IconButton, Tooltip, LinearProgress, Paper
 } from '@mui/material'
 import { motion, AnimatePresence } from 'framer-motion'
+import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import SendIcon from '@mui/icons-material/Send'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
-import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import BlockIcon from '@mui/icons-material/Block'
-import BoltIcon from '@mui/icons-material/Bolt'
 import axios from 'axios'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
 const GATEWAY = '/api-gk/api/resource/data'
 
-const cardStyle = {
-  bgcolor: 'rgba(15,34,54,0.9)',
-  backdropFilter: 'blur(16px)',
-  border: '1px solid rgba(168,85,247,0.15)',
-  borderRadius: '16px',
+const codeStyle = {
+  margin: 0, borderRadius: 0,
+  fontSize: '0.76rem',
+  background: '#1e1e1e',
+  padding: '12px 16px',
+  minHeight: 100,
 }
 
-function RequestLog({ entry }) {
+function RequestEntry({ entry }) {
   const ok = entry.status === 200
   return (
-    <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
-      <Box sx={{
-        mb: 2, p: 2.5, borderRadius: '14px',
-        background: ok
-          ? 'linear-gradient(135deg, rgba(0,245,255,0.04), rgba(0,245,255,0.01))'
-          : 'linear-gradient(135deg, rgba(255,77,109,0.06), rgba(255,77,109,0.01))',
-        border: `1px solid ${ok ? 'rgba(0,245,255,0.25)' : 'rgba(255,77,109,0.25)'}`,
-        boxShadow: ok ? '0 0 20px rgba(0,245,255,0.06)' : '0 0 20px rgba(255,77,109,0.06)',
-      }}>
-        {/* Header row */}
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+    <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28 }}>
+      <Box sx={{ mb: 2, borderRadius: '8px', overflow: 'hidden', border: '1px solid #e5e7eb', bgcolor: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+
+        {/* Entry header — Postman-style row */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 2, py: 1.2,
+          bgcolor: ok ? '#f9fafb' : '#fff9f9', borderBottom: '1px solid #e5e7eb' }}>
+          <span className="method-get">GET</span>
+          <Typography sx={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.8rem', color: '#374151', flex: 1 }}>
+            /api/resource/data
+          </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Avatar sx={{ width: 28, height: 28, bgcolor: ok ? 'rgba(0,245,255,0.15)' : 'rgba(255,77,109,0.15)' }}>
-              {ok
-                ? <CheckCircleIcon sx={{ color: '#00f5ff', fontSize: 17 }} />
-                : <BlockIcon sx={{ color: '#ff4d6d', fontSize: 17 }} />}
-            </Avatar>
-            <Typography variant="body2" sx={{ fontWeight: 800, color: ok ? '#00f5ff' : '#ff4d6d', letterSpacing: '0.03em' }}>
-              #{entry.requestNum} — {ok ? 'ALLOWED' : 'BLOCKED'}
+            <span className={ok ? 'status-allowed' : 'status-blocked'}>
+              <span className={`led ${ok ? 'led-green' : 'led-red'}`} />
+              {entry.status} {ok ? 'OK' : 'TOO MANY REQUESTS'}
+            </span>
+            <Chip label={`${entry.latency}ms`} size="small"
+              sx={{ bgcolor: '#f3f4f6', color: '#6b7280', fontSize: '0.7rem', height: 20, fontFamily: 'monospace', border: '1px solid #e5e7eb' }} />
+            <Typography variant="caption" sx={{ color: '#9ca3af', fontSize: '0.68rem' }}>
+              {new Date(entry.timestamp).toLocaleTimeString()}
             </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', gap: 0.8 }}>
-            <Chip label={`HTTP ${entry.status}`} size="small" sx={{
-              bgcolor: ok ? 'rgba(0,245,255,0.12)' : 'rgba(255,77,109,0.12)',
-              color: ok ? '#00f5ff' : '#ff4d6d',
-              border: `1px solid ${ok ? 'rgba(0,245,255,0.3)' : 'rgba(255,77,109,0.3)'}`,
-              fontWeight: 800, fontSize: '0.7rem', height: 22,
-            }} />
-            <Chip icon={<BoltIcon sx={{ fontSize: '12px !important', color: '#ffd60a !important' }} />}
-              label={`${entry.latency}ms`} size="small"
-              sx={{ bgcolor: 'rgba(255,214,10,0.08)', color: '#ffd60a', border: '1px solid rgba(255,214,10,0.2)', fontSize: '0.7rem', height: 22 }} />
-            <Chip label={new Date(entry.timestamp).toLocaleTimeString()} size="small"
-              sx={{ bgcolor: 'rgba(148,163,184,0.06)', color: '#64748b', fontSize: '0.7rem', height: 22 }} />
+            <Chip label={`#${entry.requestNum}`} size="small"
+              sx={{ bgcolor: '#f3f4f6', color: '#6b7280', fontSize: '0.68rem', height: 18 }} />
           </Box>
         </Box>
 
-        <Grid container spacing={1.5}>
-          <Grid item xs={12} md={6}>
-            <Box sx={{ mb: 0.8, display: 'flex', alignItems: 'center', gap: 0.6 }}>
-              <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: '#a855f7' }} />
-              <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 700, letterSpacing: '0.08em', fontSize: '0.68rem' }}>REQUEST SENT</Typography>
-            </Box>
-            <SyntaxHighlighter language="bash" style={vscDarkPlus}
-              customStyle={{ margin: 0, borderRadius: 8, fontSize: '0.72rem', background: '#060e18', padding: '10px', border: '1px solid rgba(168,85,247,0.1)' }}>
-              {entry.requestSnippet}
-            </SyntaxHighlighter>
+        {/* Two-panel: Request | Response */}
+        <Grid container sx={{ minHeight: 120 }}>
+          <Grid item xs={12} md={6} sx={{ borderRight: { md: '1px solid #2d2d2d' } }}>
+            <div className="terminal-panel" style={{ borderRadius: 0, border: 'none', height: '100%' }}>
+              <div className="title-bar">
+                <span className="dot dot-red" />
+                <span className="dot dot-yellow" />
+                <span className="dot dot-green" />
+                <Typography sx={{ color: '#9ca3af', fontSize: '0.7rem', ml: 1, fontFamily: 'monospace' }}>request</Typography>
+              </div>
+              <SyntaxHighlighter language="bash" style={atomDark} customStyle={codeStyle}>
+                {entry.requestSnippet}
+              </SyntaxHighlighter>
+            </div>
           </Grid>
           <Grid item xs={12} md={6}>
-            <Box sx={{ mb: 0.8, display: 'flex', alignItems: 'center', gap: 0.6 }}>
-              <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: ok ? '#00f5ff' : '#ff4d6d' }} />
-              <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 700, letterSpacing: '0.08em', fontSize: '0.68rem' }}>RESPONSE RECEIVED</Typography>
-            </Box>
-            <SyntaxHighlighter language="json" style={vscDarkPlus}
-              customStyle={{ margin: 0, borderRadius: 8, fontSize: '0.72rem', background: '#060e18', padding: '10px', border: `1px solid ${ok ? 'rgba(0,245,255,0.1)' : 'rgba(255,77,109,0.1)'}` }}>
-              {entry.responseSnippet}
-            </SyntaxHighlighter>
+            <div className="terminal-panel" style={{ borderRadius: 0, border: 'none', height: '100%' }}>
+              <div className="title-bar">
+                <span className="dot dot-red" />
+                <span className="dot dot-yellow" />
+                <span className="dot dot-green" />
+                <Typography sx={{ color: '#9ca3af', fontSize: '0.7rem', ml: 1, fontFamily: 'monospace' }}>response · {entry.status}</Typography>
+              </div>
+              <SyntaxHighlighter language="json" style={atomDark} customStyle={codeStyle}>
+                {entry.responseSnippet}
+              </SyntaxHighlighter>
+            </div>
           </Grid>
         </Grid>
       </Box>
@@ -94,219 +88,214 @@ export default function Playground({ logs, setLogs, requestNum }) {
   const [apiKey, setApiKey] = useState('recruiter-demo')
   const [loading, setLoading] = useState(false)
   const [demoRunning, setDemoRunning] = useState(false)
+  const [progress, setProgress] = useState(0)
   const [copied, setCopied] = useState(false)
-  const [demoProgress, setDemoProgress] = useState(0)
 
   const sendRequest = async (key) => {
     const num = ++requestNum.current
-    const startTime = Date.now()
-    const usedKey = key || apiKey || 'anonymous'
-    const requestSnippet = `curl -X GET http://localhost:8090/api/resource/data \\\n  -H "X-API-KEY: ${usedKey}"`
+    const t0 = Date.now()
+    const k = key || apiKey || 'anon'
+    const snippet = `curl -X GET http://localhost:8090/api/resource/data \\\n  -H "X-API-KEY: ${k}"`
     try {
-      const res = await axios.get(GATEWAY, { headers: { 'X-API-KEY': usedKey } })
-      const latency = Date.now() - startTime
-      setLogs(prev => [{ requestNum: num, status: 200, latency, timestamp: Date.now(), requestSnippet, responseSnippet: JSON.stringify(res.data, null, 2) }, ...prev])
+      const res = await axios.get(GATEWAY, { headers: { 'X-API-KEY': k } })
+      setLogs(p => [{ requestNum: num, status: 200, latency: Date.now()-t0, timestamp: Date.now(), requestSnippet: snippet, responseSnippet: JSON.stringify(res.data, null, 2) }, ...p])
     } catch (err) {
-      const latency = Date.now() - startTime
       const status = err.response?.status || 0
-      const body = err.response?.data || { error: 'Request failed' }
-      setLogs(prev => [{ requestNum: num, status, latency, timestamp: Date.now(), requestSnippet, responseSnippet: JSON.stringify(body, null, 2) }, ...prev])
+      setLogs(p => [{ requestNum: num, status, latency: Date.now()-t0, timestamp: Date.now(), requestSnippet: snippet, responseSnippet: JSON.stringify(err.response?.data || { error: 'failed' }, null, 2) }, ...p])
     }
   }
 
   const handleSingle = async () => { setLoading(true); await sendRequest(); setLoading(false) }
-
   const handleDemo = async () => {
-    setDemoRunning(true); setDemoProgress(0)
-    const demoKey = `demo-${Date.now()}`
-    for (let i = 0; i < 7; i++) {
-      await sendRequest(demoKey)
-      setDemoProgress(Math.round(((i + 1) / 7) * 100))
-      await new Promise(r => setTimeout(r, 420))
-    }
+    setDemoRunning(true); setProgress(0)
+    const k = `demo-${Date.now()}`
+    for (let i = 0; i < 7; i++) { await sendRequest(k); setProgress(Math.round((i+1)/7*100)); await new Promise(r => setTimeout(r, 420)) }
     setDemoRunning(false)
   }
 
-  const curlExample = `curl -X GET http://localhost:8090/api/resource/data \\\n  -H "X-API-KEY: ${apiKey || 'your-key'}"`
-  const copyToClipboard = () => { navigator.clipboard.writeText(curlExample); setCopied(true); setTimeout(() => setCopied(false), 2000) }
-
-  const allowedCount = logs.filter(l => l.status === 200).length
-  const blockedCount = logs.filter(l => l.status !== 200).length
+  const allowed = logs.filter(l => l.status === 200).length
+  const blocked = logs.filter(l => l.status !== 200).length
+  const curl = `curl -X GET http://localhost:8090/api/resource/data \\\n  -H "X-API-KEY: ${apiKey}"`
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4, px: { xs: 2, md: 4 } }}>
+    <Box sx={{ display: 'flex', height: 'calc(100vh - 56px)' }}>
 
-      {/* Hero Header */}
-      <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
-          <Typography variant="h4" sx={{ fontWeight: 900, background: 'linear-gradient(135deg, #a855f7, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            🎮 Rate Limiter Playground
-          </Typography>
-          <Chip label="LIVE" size="small" sx={{ bgcolor: 'rgba(0,245,255,0.1)', color: '#00f5ff', border: '1px solid rgba(0,245,255,0.3)', fontWeight: 800, fontSize: '0.68rem', height: 22 }} />
+      {/* LEFT SIDEBAR — Postman style */}
+      <Box sx={{ width: 280, flexShrink: 0, bgcolor: '#2c2c2c', display: 'flex', flexDirection: 'column',
+        borderRight: '1px solid #3a3a3a', overflowY: 'auto' }}>
+
+        {/* Collection header */}
+        <Box sx={{ px: 2.5, py: 2, borderBottom: '1px solid #3a3a3a' }}>
+          <Typography sx={{ color: '#e5e7eb', fontWeight: 700, fontSize: '0.85rem', mb: 0.3 }}>GateKeeper API</Typography>
+          <Typography sx={{ color: '#6b7280', fontSize: '0.72rem' }}>Rate Limiter · 3 endpoints</Typography>
         </Box>
-        <Typography sx={{ color: '#64748b', fontSize: '0.95rem' }}>
-          Send real HTTP requests through the GateKeeper API Gateway. Every hop is transparent — see the exact curl sent and raw JSON received.
-        </Typography>
+
+        {/* Endpoints list */}
+        {[
+          { method: 'POST', path: '/rate-limit/check', label: 'Check Rate Limit', active: false },
+          { method: 'GET',  path: '/api/resource/data', label: 'Protected Resource', active: true },
+          { method: 'GET',  path: '/analytics/blocked', label: 'Analytics Events', active: false },
+        ].map(ep => (
+          <Box key={ep.path} sx={{
+            px: 2.5, py: 1.5,
+            bgcolor: ep.active ? '#3a3a3a' : 'transparent',
+            borderLeft: ep.active ? '2px solid #ef6c1a' : '2px solid transparent',
+            cursor: 'pointer', '&:hover': { bgcolor: '#333' }
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.3 }}>
+              <Typography sx={{
+                fontSize: '0.65rem', fontWeight: 800, fontFamily: 'monospace', px: 0.8, py: 0.2, borderRadius: '3px',
+                color: ep.method === 'GET' ? '#4ade80' : '#fb923c',
+                bgcolor: ep.method === 'GET' ? 'rgba(74,222,128,0.12)' : 'rgba(251,146,60,0.12)',
+              }}>{ep.method}</Typography>
+              <Typography sx={{ color: ep.active ? '#f9fafb' : '#9ca3af', fontSize: '0.75rem', fontWeight: ep.active ? 600 : 400 }}>
+                {ep.label}
+              </Typography>
+            </Box>
+            <Typography sx={{ color: '#4b5563', fontSize: '0.68rem', fontFamily: 'monospace', pl: 3.5 }}>{ep.path}</Typography>
+          </Box>
+        ))}
+
+        <Divider sx={{ borderColor: '#3a3a3a', my: 1 }} />
+
+        {/* Rate limit rules */}
+        <Box sx={{ px: 2.5, py: 1.5 }}>
+          <Typography sx={{ color: '#6b7280', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.08em', mb: 1.5 }}>RATE LIMIT CONFIG</Typography>
+          {[
+            ['Max Requests', '5 / window'],
+            ['Window', '60 seconds'],
+            ['Algorithm', 'Sliding Window'],
+            ['Backend', 'Redis ZSET'],
+            ['On Exceed', 'HTTP 429'],
+          ].map(([k, v]) => (
+            <Box key={k} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+              <Typography sx={{ color: '#6b7280', fontSize: '0.72rem' }}>{k}</Typography>
+              <Typography sx={{ color: '#d1d5db', fontSize: '0.72rem', fontFamily: 'monospace', fontWeight: 600 }}>{v}</Typography>
+            </Box>
+          ))}
+        </Box>
+
+        {/* Session stats */}
+        {logs.length > 0 && (
+          <>
+            <Divider sx={{ borderColor: '#3a3a3a', my: 1 }} />
+            <Box sx={{ px: 2.5, py: 1.5 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                <Typography sx={{ color: '#6b7280', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.08em' }}>SESSION</Typography>
+                <IconButton size="small" onClick={() => { setLogs([]); requestNum.current = 0 }}
+                  sx={{ color: '#4b5563', p: 0.3, '&:hover': { color: '#ef4444' } }}>
+                  <DeleteSweepIcon sx={{ fontSize: 15 }} />
+                </IconButton>
+              </Box>
+              <Grid container spacing={1}>
+                {[['Total', logs.length, '#e5e7eb'], ['Allowed', allowed, '#4ade80'], ['Blocked', blocked, '#f87171'],
+                  ['Avg ms', `${Math.round(logs.reduce((a,b)=>a+b.latency,0)/logs.length)}`, '#fb923c']].map(([l,v,c]) => (
+                  <Grid item xs={6} key={l}>
+                    <Box sx={{ bgcolor: '#353535', borderRadius: '6px', p: 1, textAlign: 'center' }}>
+                      <Typography sx={{ color: c, fontSize: '1.2rem', fontWeight: 900, lineHeight: 1 }}>{v}</Typography>
+                      <Typography sx={{ color: '#4b5563', fontSize: '0.65rem', mt: 0.3 }}>{l}</Typography>
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
+          </>
+        )}
       </Box>
 
-      <Grid container spacing={3}>
-        {/* Left Panel */}
-        <Grid item xs={12} md={4}>
+      {/* RIGHT — Main workspace */}
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
-          {/* Config Card */}
-          <Card sx={{ ...cardStyle, mb: 2 }}>
-            <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" sx={{ mb: 2.5, color: '#e2e8f0' }}>⚙️ Request Config</Typography>
+        {/* URL Bar — Postman style top bar */}
+        <Box sx={{ bgcolor: '#fff', borderBottom: '1px solid #e5e7eb', px: 3, py: 1.8 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>
+            <Box sx={{ bgcolor: '#fef3e8', color: '#ef6c1a', fontSize: '0.72rem', fontWeight: 800,
+              fontFamily: 'monospace', px: 1.2, py: 0.5, borderRadius: '5px', border: '1px solid #fbd5b5' }}>GET</Box>
+            <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 1,
+              bgcolor: '#f9fafb', border: '1.5px solid #d1d5db', borderRadius: '7px', px: 1.5, py: 0.8 }}>
+              <Typography sx={{ color: '#9ca3af', fontSize: '0.78rem', fontFamily: 'monospace' }}>localhost:8090</Typography>
+              <Typography sx={{ color: '#d1d5db' }}>/</Typography>
+              <Typography sx={{ color: '#111827', fontSize: '0.78rem', fontFamily: 'monospace', fontWeight: 600 }}>api/resource/data</Typography>
+            </Box>
+            <Button variant="contained" onClick={handleSingle} disabled={loading || demoRunning}
+              startIcon={<SendIcon sx={{ fontSize: '16px !important' }} />}
+              sx={{ px: 2.5, py: 0.9, fontSize: '0.82rem', bgcolor: '#ef6c1a', '&:hover': { bgcolor: '#d45f15' }, minWidth: 90 }}>
+              {loading ? '...' : 'Send'}
+            </Button>
+            <Button variant="outlined" onClick={handleDemo} disabled={loading || demoRunning}
+              startIcon={<PlayArrowIcon sx={{ fontSize: '16px !important' }} />}
+              sx={{ px: 2, py: 0.9, fontSize: '0.82rem', borderColor: '#d1d5db', color: '#374151',
+                '&:hover': { borderColor: '#ef6c1a', color: '#ef6c1a', bgcolor: '#fef3e8' } }}>
+              {demoRunning ? `${progress}%` : 'Run Demo'}
+            </Button>
+          </Box>
 
-              <TextField fullWidth label="X-API-KEY Header" value={apiKey}
-                onChange={e => setApiKey(e.target.value)} variant="outlined" size="small"
-                helperText="Same key = shared rate limit window"
-                sx={{ mb: 2.5, '& .MuiOutlinedInput-root': { fontFamily: 'JetBrains Mono, monospace', fontSize: '0.85rem', bgcolor: 'rgba(13,27,42,0.8)' },
-                  '& .MuiFormHelperText-root': { color: '#475569' } }} />
+          {/* Headers row */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Typography sx={{ color: '#9ca3af', fontSize: '0.72rem', fontWeight: 600 }}>HEADERS</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1,
+              bgcolor: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: '5px', px: 1.5, py: 0.5 }}>
+              <Typography sx={{ color: '#6b7280', fontSize: '0.72rem', fontFamily: 'monospace' }}>X-API-KEY:</Typography>
+              <input
+                value={apiKey} onChange={e => setApiKey(e.target.value)}
+                style={{ border: 'none', outline: 'none', background: 'transparent', color: '#ef6c1a',
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: '0.76rem', fontWeight: 700, width: 160 }}
+              />
+            </Box>
+            <Tooltip title={copied ? 'Copied!' : 'Copy curl'}>
+              <IconButton size="small" onClick={() => { navigator.clipboard.writeText(curl); setCopied(true); setTimeout(()=>setCopied(false),2000) }}
+                sx={{ color: '#9ca3af', '&:hover': { color: '#ef6c1a' } }}>
+                <ContentCopyIcon sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Tooltip>
+            <Typography sx={{ color: '#9ca3af', fontSize: '0.68rem' }}>copy as curl</Typography>
+            {demoRunning && <LinearProgress variant="determinate" value={progress}
+              sx={{ flex: 1, height: 3, borderRadius: 2, bgcolor: '#f3f4f6',
+                '& .MuiLinearProgress-bar': { bgcolor: '#ef6c1a' } }} />}
+          </Box>
+        </Box>
 
-              {/* Curl Preview */}
-              <Box sx={{ mb: 2.5, p: 1.5, bgcolor: '#060e18', borderRadius: '10px', border: '1px solid rgba(168,85,247,0.15)' }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                  <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 700, letterSpacing: '0.08em', fontSize: '0.65rem' }}>CURL EQUIVALENT</Typography>
-                  <Tooltip title={copied ? '✅ Copied!' : 'Copy to clipboard'}>
-                    <IconButton size="small" onClick={copyToClipboard} sx={{ color: copied ? '#00f5ff' : '#475569', transition: 'color 0.2s' }}>
-                      <ContentCopyIcon sx={{ fontSize: 15 }} />
-                    </IconButton>
-                  </Tooltip>
-                </Box>
-                <Typography variant="caption" sx={{ fontFamily: 'JetBrains Mono, monospace', color: '#a855f7', whiteSpace: 'pre-wrap', fontSize: '0.7rem', lineHeight: 1.7 }}>
-                  {curlExample}
+        {/* Tabs bar */}
+        <Box sx={{ bgcolor: '#fff', borderBottom: '1px solid #e5e7eb', px: 3, display: 'flex', gap: 0 }}>
+          {['Response Log', 'Body', 'Headers'].map((t, i) => (
+            <Typography key={t} sx={{
+              px: 2, py: 1.2, fontSize: '0.8rem', cursor: 'pointer', fontWeight: 500,
+              color: i === 0 ? '#ef6c1a' : '#9ca3af',
+              borderBottom: i === 0 ? '2px solid #ef6c1a' : '2px solid transparent',
+              transition: 'all 0.15s',
+            }}>{t}</Typography>
+          ))}
+          <Box sx={{ flex: 1 }} />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, pr: 1 }}>
+            <Chip label={`${allowed} 200`} size="small" sx={{ bgcolor: '#f0fdf4', color: '#15803d', border: '1px solid #86efac', fontSize: '0.68rem', height: 20 }} />
+            <Chip label={`${blocked} 429`} size="small" sx={{ bgcolor: '#fef2f2', color: '#991b1b', border: '1px solid #fca5a5', fontSize: '0.68rem', height: 20 }} />
+          </Box>
+        </Box>
+
+        {/* Log area */}
+        <Box sx={{ flex: 1, overflowY: 'auto', p: 3, bgcolor: '#f3f4f6' }}>
+          {logs.length === 0 ? (
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 2 }}>
+              <Box sx={{ p: 3, bgcolor: '#fff', borderRadius: '12px', border: '1px solid #e5e7eb', textAlign: 'center', maxWidth: 380 }}>
+                <Typography sx={{ fontSize: '2rem', mb: 1 }}>🛡️</Typography>
+                <Typography sx={{ fontWeight: 700, color: '#374151', mb: 0.5 }}>Hit Send to fire a request</Typography>
+                <Typography sx={{ color: '#9ca3af', fontSize: '0.82rem', lineHeight: 1.6 }}>
+                  Every request is logged here with the exact curl sent and raw JSON received — just like Postman, but wired into a live distributed system.
                 </Typography>
-              </Box>
-
-              {/* Buttons */}
-              <Button fullWidth variant="contained" startIcon={<SendIcon />} onClick={handleSingle}
-                disabled={loading || demoRunning}
-                sx={{ mb: 1.5, py: 1.3, fontSize: '0.9rem',
-                  background: 'linear-gradient(135deg, #a855f7, #06b6d4)',
-                  boxShadow: '0 0 20px rgba(168,85,247,0.3)',
-                  '&:hover': { background: 'linear-gradient(135deg, #9333ea, #0891b2)', boxShadow: '0 0 30px rgba(168,85,247,0.5)' },
-                  '&:disabled': { background: 'rgba(168,85,247,0.2)', color: '#475569' }
-                }}>
-                {loading ? 'Sending...' : 'Fire Single Request'}
-              </Button>
-
-              <Button fullWidth variant="outlined" startIcon={<PlayArrowIcon />} onClick={handleDemo}
-                disabled={loading || demoRunning}
-                sx={{ py: 1.3, fontSize: '0.9rem',
-                  borderColor: 'rgba(168,85,247,0.5)', color: '#a855f7',
-                  '&:hover': { borderColor: '#a855f7', bgcolor: 'rgba(168,85,247,0.08)', boxShadow: '0 0 16px rgba(168,85,247,0.2)' },
-                  '&:disabled': { borderColor: 'rgba(168,85,247,0.15)', color: '#475569' }
-                }}>
-                {demoRunning ? `Running... ${demoProgress}%` : '▶  Run Full Demo (7 Requests)'}
-              </Button>
-
-              {demoRunning && (
-                <Box sx={{ mt: 1.5 }}>
-                  <LinearProgress variant="determinate" value={demoProgress}
-                    sx={{ borderRadius: 4, bgcolor: 'rgba(168,85,247,0.1)', height: 5,
-                      '& .MuiLinearProgress-bar': { background: 'linear-gradient(90deg, #a855f7, #06b6d4)', borderRadius: 4 } }} />
-                  <Typography variant="caption" sx={{ color: '#64748b', mt: 0.5, display: 'block', textAlign: 'center' }}>
-                    Firing {Math.ceil(demoProgress / 14.3)} of 7 requests...
-                  </Typography>
-                </Box>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Rules Card */}
-          <Card sx={{ ...cardStyle, mb: 2 }}>
-            <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" sx={{ mb: 2, color: '#e2e8f0' }}>📋 Rate Limit Rules</Typography>
-              {[
-                { label: 'Max Requests', value: '5 / window', color: '#a855f7' },
-                { label: 'Window Size', value: '60 seconds', color: '#06b6d4' },
-                { label: 'Algorithm', value: 'Sliding Window Log', color: '#ffd60a' },
-                { label: 'Storage', value: 'Redis ZSET', color: '#f97316' },
-                { label: 'Decision Latency', value: '< 10ms', color: '#00f5ff' },
-                { label: 'Blocked Code', value: 'HTTP 429', color: '#ff4d6d' },
-              ].map(item => (
-                <Box key={item.label} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.9, borderBottom: '1px solid rgba(168,85,247,0.07)' }}>
-                  <Typography variant="body2" sx={{ color: '#64748b' }}>{item.label}</Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 700, fontFamily: 'JetBrains Mono, monospace', color: item.color, fontSize: '0.8rem' }}>{item.value}</Typography>
-                </Box>
-              ))}
-            </CardContent>
-          </Card>
-
-          {/* Stats Card */}
-          {logs.length > 0 && (
-            <Card sx={cardStyle}>
-              <CardContent sx={{ p: 3 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                  <Typography variant="h6" sx={{ color: '#e2e8f0' }}>📊 Session Stats</Typography>
-                  <Tooltip title="Clear all logs">
-                    <IconButton size="small" onClick={() => { setLogs([]); requestNum.current = 0 }}
-                      sx={{ color: '#475569', '&:hover': { color: '#ff4d6d' } }}>
-                      <DeleteSweepIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                </Box>
-                <Grid container spacing={1.5}>
-                  {[
-                    { label: 'Total', value: logs.length, color: '#a855f7', bg: 'rgba(168,85,247,0.08)' },
-                    { label: 'Allowed', value: allowedCount, color: '#00f5ff', bg: 'rgba(0,245,255,0.08)' },
-                    { label: 'Blocked', value: blockedCount, color: '#ff4d6d', bg: 'rgba(255,77,109,0.08)' },
-                    { label: 'Avg Latency', value: `${Math.round(logs.reduce((a,b) => a+b.latency,0)/logs.length)}ms`, color: '#ffd60a', bg: 'rgba(255,214,10,0.08)' },
-                  ].map(s => (
-                    <Grid item xs={6} key={s.label}>
-                      <Box sx={{ p: 1.5, bgcolor: s.bg, borderRadius: '10px', textAlign: 'center', border: `1px solid ${s.color}22` }}>
-                        <Typography variant="h5" sx={{ fontWeight: 900, color: s.color, lineHeight: 1 }}>{s.value}</Typography>
-                        <Typography variant="caption" sx={{ color: '#475569', fontSize: '0.68rem' }}>{s.label}</Typography>
-                      </Box>
-                    </Grid>
+                <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 0.8, justifyContent: 'center' }}>
+                  {['Request headers', 'Response body', 'Status code', 'Latency'].map(t => (
+                    <Chip key={t} label={t} size="small" sx={{ bgcolor: '#f3f4f6', color: '#6b7280', fontSize: '0.68rem', border: '1px solid #e5e7eb' }} />
                   ))}
-                </Grid>
-              </CardContent>
-            </Card>
-          )}
-        </Grid>
-
-        {/* Right Panel — Log */}
-        <Grid item xs={12} md={8}>
-          <Card sx={{ ...cardStyle, minHeight: 560 }}>
-            <CardContent sx={{ p: 3 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6" sx={{ color: '#e2e8f0' }}>📡 Live Request / Response Log</Typography>
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <Chip label={`${allowedCount} Allowed`} size="small"
-                    sx={{ bgcolor: 'rgba(0,245,255,0.08)', color: '#00f5ff', border: '1px solid rgba(0,245,255,0.2)', fontWeight: 700 }} />
-                  <Chip label={`${blockedCount} Blocked`} size="small"
-                    sx={{ bgcolor: 'rgba(255,77,109,0.08)', color: '#ff4d6d', border: '1px solid rgba(255,77,109,0.2)', fontWeight: 700 }} />
                 </Box>
               </Box>
-              <Divider sx={{ borderColor: 'rgba(168,85,247,0.1)', mb: 2 }} />
-
-              {logs.length === 0 ? (
-                <Box sx={{ textAlign: 'center', py: 10 }}>
-                  <Typography sx={{ fontSize: '3.5rem', mb: 2 }}>🛡️</Typography>
-                  <Typography variant="h6" sx={{ color: '#334155', fontWeight: 700 }}>Awaiting requests...</Typography>
-                  <Typography variant="body2" sx={{ color: '#1e3a5f', mt: 1 }}>
-                    Fire a request above — every HTTP call is logged here transparently
-                  </Typography>
-                  <Box sx={{ mt: 3, display: 'inline-flex', gap: 1 }}>
-                    {['X-API-KEY header', 'Full request URL', 'Raw JSON response', 'Response time'].map(t => (
-                      <Chip key={t} label={t} size="small"
-                        sx={{ bgcolor: 'rgba(168,85,247,0.06)', color: '#475569', border: '1px solid rgba(168,85,247,0.1)', fontSize: '0.68rem' }} />
-                    ))}
-                  </Box>
-                </Box>
-              ) : (
-                <Box sx={{ maxHeight: 680, overflowY: 'auto', pr: 0.5 }}>
-                  <AnimatePresence>
-                    {logs.map(entry => <RequestLog key={entry.requestNum} entry={entry} />)}
-                  </AnimatePresence>
-                </Box>
-              )}
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-    </Container>
+            </Box>
+          ) : (
+            <AnimatePresence>
+              {logs.map(e => <RequestEntry key={e.requestNum} entry={e} />)}
+            </AnimatePresence>
+          )}
+        </Box>
+      </Box>
+    </Box>
   )
 }
