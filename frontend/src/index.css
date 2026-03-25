@@ -5,26 +5,60 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  background-color: #0a0e1a;
-  color: #f9fafb;
+  background-color: #0d1b2a;
+  color: #e2e8f0;
   font-family: 'Inter', sans-serif;
   min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 20% 20%, rgba(168,85,247,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(6,182,212,0.06) 0%, transparent 60%);
 }
 
 .font-mono { font-family: 'JetBrains Mono', monospace; }
 
-.gk-glow {
-  box-shadow: 0 0 20px rgba(99, 102, 241, 0.15);
+.glass-card {
+  background: rgba(15, 34, 54, 0.8) !important;
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(168,85,247,0.18) !important;
 }
 
-.gk-glow-green {
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+.neon-border-green {
+  border: 1px solid rgba(0,245,255,0.4) !important;
+  box-shadow: 0 0 16px rgba(0,245,255,0.12), inset 0 0 16px rgba(0,245,255,0.04);
 }
 
-.gk-glow-red {
-  box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+.neon-border-red {
+  border: 1px solid rgba(255,77,109,0.4) !important;
+  box-shadow: 0 0 16px rgba(255,77,109,0.12), inset 0 0 16px rgba(255,77,109,0.04);
 }
 
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #111827; }
-::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
+.gradient-text {
+  background: linear-gradient(135deg, #a855f7, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-text-hot {
+  background: linear-gradient(135deg, #f97316, #ff4d6d);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.glow-purple { box-shadow: 0 0 24px rgba(168,85,247,0.3); }
+.glow-cyan   { box-shadow: 0 0 24px rgba(6,182,212,0.3); }
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(168,85,247,0.4); }
+  50%       { box-shadow: 0 0 20px rgba(168,85,247,0.8); }
+}
+.pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+
+@keyframes scan-line {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #0d1b2a; }
+::-webkit-scrollbar-thumb { background: rgba(168,85,247,0.4); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(168,85,247,0.7); }
