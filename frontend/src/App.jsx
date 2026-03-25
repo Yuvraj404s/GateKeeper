@@ -10,13 +10,13 @@ export default function App() {
   const [logs, setLogs] = useState([])
   const requestNum = useRef(0)
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#f8f9fc' }}>
+    <Box sx={{ minHeight:'100vh', bgcolor:'#18181b' }}>
       <Navbar />
-      <Box sx={{ pt: '60px' }}>
+      <Box sx={{ pt:'56px' }}>
         <Routes>
-          <Route path="/" element={<Playground logs={logs} setLogs={setLogs} requestNum={requestNum} />} />
-          <Route path="/analytics" element={<Analytics />} />
-          <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/" element={<Playground logs={logs} setLogs={setLogs} requestNum={requestNum}/>}/>
+          <Route path="/analytics" element={<Analytics/>}/>
+          <Route path="/how-it-works" element={<HowItWorks/>}/>
         </Routes>
       </Box>
     </Box>
