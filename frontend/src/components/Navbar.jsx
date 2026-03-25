@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { AppBar, Toolbar, Box, Button, Chip, Typography } from '@mui/material'
 import ShieldIcon from '@mui/icons-material/Shield'
@@ -17,39 +17,75 @@ export default function Navbar() {
   const location = useLocation()
 
   return (
-    <AppBar position="fixed" sx={{ bgcolor: 'rgba(10,14,26,0.95)', backdropFilter: 'blur(12px)', borderBottom: '1px solid #1f2937', boxShadow: 'none' }}>
-      <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 2, md: 4 } }}>
+    <AppBar position="fixed" elevation={0} sx={{
+      background: 'rgba(13,27,42,0.85)',
+      backdropFilter: 'blur(20px)',
+      borderBottom: '1px solid rgba(168,85,247,0.2)',
+      boxShadow: '0 1px 30px rgba(168,85,247,0.1)',
+    }}>
+      <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 2, md: 5 }, minHeight: '68px !important' }}>
+
+        {/* Logo */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer' }} onClick={() => navigate('/')}>
+          <Box sx={{
+            width: 38, height: 38, borderRadius: '10px',
+            background: 'linear-gradient(135deg, #a855f7, #06b6d4)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 0 16px rgba(168,85,247,0.5)',
+          }}>
+            <ShieldIcon sx={{ color: '#fff', fontSize: 22 }} />
+          </Box>
+          <Box>
+            <Typography variant="h6" sx={{
+              fontWeight: 900, fontSize: '1.2rem', lineHeight: 1,
+              background: 'linear-gradient(135deg, #a855f7, #06b6d4)',
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+              letterSpacing: '-0.5px'
+            }}>
+              GateKeeper
+            </Typography>
+            <Typography variant="caption" sx={{ color: '#64748b', fontSize: '0.65rem', letterSpacing: '0.08em' }}>
+              DISTRIBUTED RATE LIMITER
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* Nav Tabs */}
+        <Box sx={{ display: 'flex', gap: 0.5, bgcolor: 'rgba(168,85,247,0.06)', borderRadius: '12px', p: 0.5, border: '1px solid rgba(168,85,247,0.12)' }}>
+          {tabs.map(tab => {
+            const active = location.pathname === tab.path
+            return (
+              <Button key={tab.path} startIcon={tab.icon} onClick={() => navigate(tab.path)}
+                sx={{
+                  px: 2, py: 0.8, borderRadius: '9px', fontSize: '0.85rem',
+                  color: active ? '#fff' : '#94a3b8',
+                  background: active ? 'linear-gradient(135deg, rgba(168,85,247,0.3), rgba(6,182,212,0.2))' : 'transparent',
+                  border: active ? '1px solid rgba(168,85,247,0.4)' : '1px solid transparent',
+                  boxShadow: active ? '0 0 12px rgba(168,85,247,0.2)' : 'none',
+                  '&:hover': { color: '#e2e8f0', background: 'rgba(168,85,247,0.1)' },
+                  transition: 'all 0.2s ease',
+                }}>
+                {tab.label}
+              </Button>
+            )
+          })}
+        </Box>
+
+        {/* Live Badge */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <ShieldIcon sx={{ color: '#6366f1', fontSize: 28 }} />
-          <Typography variant="h6" sx={{ fontWeight: 800, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            GateKeeper
-          </Typography>
-          <Chip label="v1.0.0" size="small" sx={{ bgcolor: '#1f2937', color: '#9ca3af', fontSize: '0.7rem', height: 20 }} />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8,
+            px: 1.5, py: 0.6, borderRadius: '20px',
+            bgcolor: 'rgba(0,245,255,0.08)', border: '1px solid rgba(0,245,255,0.25)',
+          }}>
+            <Box sx={{ width: 7, height: 7, borderRadius: '50%', bgcolor: '#00f5ff',
+              boxShadow: '0 0 8px #00f5ff', animation: 'pulse-glow 2s infinite' }} />
+            <Typography variant="caption" sx={{ color: '#00f5ff', fontWeight: 700, fontSize: '0.75rem', letterSpacing: '0.05em' }}>
+              LIVE
+            </Typography>
+          </Box>
+          <Chip label="Java 21 · Spring Boot 3 · Redis" size="small"
+            sx={{ bgcolor: 'rgba(168,85,247,0.08)', color: '#a855f7', border: '1px solid rgba(168,85,247,0.2)', fontSize: '0.68rem', height: 24 }} />
         </Box>
-
-        <Box sx={{ display: 'flex', gap: 0.5 }}>
-          {tabs.map(tab => (
-            <Button
-              key={tab.path}
-              startIcon={tab.icon}
-              onClick={() => navigate(tab.path)}
-              sx={{
-                color: location.pathname === tab.path ? '#6366f1' : '#9ca3af',
-                bgcolor: location.pathname === tab.path ? 'rgba(99,102,241,0.1)' : 'transparent',
-                px: 2,
-                '&:hover': { bgcolor: 'rgba(99,102,241,0.08)', color: '#a5b4fc' }
-              }}
-            >
-              {tab.label}
-            </Button>
-          ))}
-        </Box>
-
-        <Chip
-          label="🟢 Live"
-          size="small"
-          sx={{ bgcolor: 'rgba(16,185,129,0.1)', color: '#10b981', border: '1px solid rgba(16,185,129,0.3)', fontWeight: 700 }}
-        />
       </Toolbar>
     </AppBar>
   )
