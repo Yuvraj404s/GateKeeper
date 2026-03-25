@@ -9,37 +9,17 @@ import './index.css'
 const theme = createTheme({
   palette: {
     mode: 'light',
-    primary:    { main: '#ef6c1a' },
-    success:    { main: '#1a7f4b' },
-    error:      { main: '#c0392b' },
-    warning:    { main: '#d97706' },
-    background: { default: '#f3f4f6', paper: '#ffffff' },
-    text:       { primary: '#111827', secondary: '#6b7280' },
+    primary:    { main: '#7c3aed' },
+    success:    { main: '#059669' },
+    error:      { main: '#dc2626' },
+    background: { default: '#f8f9fc', paper: '#ffffff' },
+    text:       { primary: '#0f172a', secondary: '#64748b' },
   },
-  typography: {
-    fontFamily: 'Inter, sans-serif',
-    h4: { fontWeight: 800 },
-    h5: { fontWeight: 700 },
-    h6: { fontWeight: 700 },
-  },
-  shape: { borderRadius: 8 },
+  typography: { fontFamily: 'Inter, sans-serif' },
+  shape: { borderRadius: 10 },
   components: {
-    MuiCard: {
-      styleOverrides: {
-        root: { backgroundImage: 'none', boxShadow: '0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05)' }
-      }
-    },
-    MuiButton: {
-      styleOverrides: {
-        root: { textTransform: 'none', fontWeight: 600, borderRadius: 6 },
-        containedPrimary: {
-          background: '#ef6c1a',
-          boxShadow: 'none',
-          '&:hover': { background: '#d45f15', boxShadow: 'none' }
-        }
-      }
-    },
-    MuiAppBar: { styleOverrides: { root: { boxShadow: 'none' } } }
+    MuiCard: { styleOverrides: { root: { backgroundImage: 'none', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' } } },
+    MuiButton: { styleOverrides: { root: { textTransform: 'none', fontWeight: 600, borderRadius: 8 } } },
   }
 })
 
