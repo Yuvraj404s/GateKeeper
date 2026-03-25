@@ -8,12 +8,13 @@ import './index.css'
 
 const theme = createTheme({
   palette: {
-    mode: 'dark',
-    primary: { main: '#a855f7' },
-    success: { main: '#00f5ff' },
-    error: { main: '#ff4d6d' },
-    warning: { main: '#ffd60a' },
-    background: { default: '#0d1b2a', paper: '#0f2236' },
+    mode: 'light',
+    primary:    { main: '#ef6c1a' },
+    success:    { main: '#1a7f4b' },
+    error:      { main: '#c0392b' },
+    warning:    { main: '#d97706' },
+    background: { default: '#f3f4f6', paper: '#ffffff' },
+    text:       { primary: '#111827', secondary: '#6b7280' },
   },
   typography: {
     fontFamily: 'Inter, sans-serif',
@@ -21,41 +22,24 @@ const theme = createTheme({
     h5: { fontWeight: 700 },
     h6: { fontWeight: 700 },
   },
-  shape: { borderRadius: 14 },
+  shape: { borderRadius: 8 },
   components: {
     MuiCard: {
       styleOverrides: {
-        root: {
-          backgroundImage: 'none',
-          border: '1px solid rgba(168,85,247,0.15)',
-          backdropFilter: 'blur(12px)',
-        }
+        root: { backgroundImage: 'none', boxShadow: '0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05)' }
       }
     },
     MuiButton: {
       styleOverrides: {
-        root: { textTransform: 'none', fontWeight: 700, borderRadius: 10 },
+        root: { textTransform: 'none', fontWeight: 600, borderRadius: 6 },
         containedPrimary: {
-          background: 'linear-gradient(135deg, #a855f7, #06b6d4)',
-          boxShadow: '0 0 20px rgba(168,85,247,0.35)',
-          '&:hover': {
-            background: 'linear-gradient(135deg, #9333ea, #0891b2)',
-            boxShadow: '0 0 30px rgba(168,85,247,0.55)',
-          }
+          background: '#ef6c1a',
+          boxShadow: 'none',
+          '&:hover': { background: '#d45f15', boxShadow: 'none' }
         }
       }
     },
-    MuiTextField: {
-      styleOverrides: {
-        root: {
-          '& .MuiOutlinedInput-root': {
-            '& fieldset': { borderColor: 'rgba(168,85,247,0.3)' },
-            '&:hover fieldset': { borderColor: 'rgba(168,85,247,0.6)' },
-            '&.Mui-focused fieldset': { borderColor: '#a855f7', boxShadow: '0 0 10px rgba(168,85,247,0.2)' },
-          }
-        }
-      }
-    }
+    MuiAppBar: { styleOverrides: { root: { boxShadow: 'none' } } }
   }
 })
 
